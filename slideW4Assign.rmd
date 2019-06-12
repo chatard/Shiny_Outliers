@@ -1,0 +1,129 @@
+---
+title: "Coursera assignment"
+subtitle: "Developing Data Products: A Shiny Application"
+author: "Jacques Chatard"
+date: "2019 june 11"
+output:
+  ioslides_presentation
+---
+
+
+<style>
+body p {
+  color: #141442;
+}
+slides > slide.title-slide hgroup h1 {  color: #35355b;
+  font-size: 60px;
+  letter-spacing: 10;
+}
+slides > slide.title-slide hgroup h2 {  
+  color: #35355b;
+  font-size: 30px;
+  letter-spacing: 10;
+}
+h2 { 
+ color: #2c3e5b; 		
+}
+h3 { 
+ color: #2c3e5b;		
+}
+h2.title {
+    color: #2c3e5b;
+}
+slides > slide.title-slide p {
+  color: #2a3b56;
+}
+
+</style>
+
+
+## Introduction  {.smaller}  
+
+This application is about a very basic and very simple 'Shiny' application that wants to facilitate a naive visualization that can intuitively show the importance and possible influence of an **outlier value in a simple analysis of linear regression**.  
+
+[Please click here to go to the application itself:](https://chatard.shinyapps.io/outliers/)  
+
+[Please click here, to take a look at the code on Github:](https://github.com/chatard/Shyny_Outliers)  
+
+### Structure of the application interface: 
+
+The left part of the page is reserved for widgets from which we will enter the coordinates of an outlier.  
+
+The right part of the screen includes **3 tabs**  reserved, in order:   
+
+- 1 to display the plot.  
+
+- 2 to a summary of the various influences of the outlier.    
+
+- 3 and finally, a third tab' is reserved for an online help.    
+
+ 
+
+## Our regression model:  {.smaller}  
+
+we simulate a random distribution around a line according to the following model:
+$\color{#394f77}{Y = \beta_0 + \beta_1 X + \epsilon}$
+Where $\color{#394f77}{\beta_0}$ is the intercept,  $\color{#394f77}{\beta_1}$ is the slope and $\color{#394f77}{\epsilon}$ is a random background noise : $\color{#394f77}{\epsilon \sim \mathcal{N} (\mu , s)}$.  
+
+So, I'm going to use a code like this :  
+
+```{r model, echo=TRUE, eval=FALSE}
+### <b>
+noise <- rnorm(samplesize, noise.mean, noise.sd)
+x <- 1:samplesize
+y= slope*x + intercept + noise
+### </b>
+```
+
+From left panel Shiny sliders I get x and y coordinates to **choose and fix the position of the outlier** which I finally add to vectors x and y like this:  
+
+```{r addingoutlier, echo=TRUE, eval=FALSE}
+### <b>
+newx <- append(x, currentXoutlier, after = length(x))
+newy <- append(y, currentYoutlier,  after = length(y))
+### </b>
+```
+
+## Example: influence on the slope (1). {.smaller}        
+
+```{r noise, results='asis'}
+### <b>
+samplesize = 42; x = 1: samplesize 
+set.seed(112)
+noise <- rnorm(samplesize, 7, 4)
+y = 0.4*x + 4 + noise
+md1 <- lm(y ~ x)
+md1slope <- round(summary(md1)$coefficient[2,1], digits = 2)
+# Now, I substitute a value ... (I add an outlier) . 
+x[42] <- 98; y[42]<-105
+md2<-lm(y~x)
+md2slope <- round(summary(md2)$coefficient[2,1], digits = 2)
+# looking how outlier influence the slope :    
+paste0("slope without outlier = ", md1slope)
+paste0("slop with an outlier =", md2slope )
+
+### </b>
+
+```
+
+(1)This piece of code is similar to the one used in the **server.R** file of the Shiny application.
+
+## Summary about parts of the ui: {.smaller}        
+
+      
+
+
+Sidebar panel:                   | Main panel (tabset panel): 
+-------------------------------- | ---------------------------------
+input slider for x coordinate    | **tabpanel "plot"**
+-                                | (displays the interactive plot.) 
+input slider for y coordtnate    | **tabpanel "summary"**
+-                                | (displays results like slopes.)
+input slider for sample size     | **tabpanel "help"**
+-                                | (displays the use of the interface)
+  
+*The left panel contains the widgets needed to enter variables.*  
+*The main panel is reserved for the output of the results.*
+
+
+
