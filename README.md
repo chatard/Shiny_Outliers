@@ -1,1 +1,1 @@
-# Shyny_Outliers
+# Shiny_Outliers
